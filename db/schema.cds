@@ -1,6 +1,64 @@
 namespace com.alfa02;
 
 define type Name        : String(50);
+entity SelProducts   as select from Products;
+
+entity SelProducts1  as
+    select from Products {
+        *
+    };
+
+entity SelProducts2  as
+    select from Products {
+        Name,
+        Price,
+        Quantity
+    };
+
+entity SelProducts3  as
+    select from Products
+    left join ProductReview
+        on Products.Name = ProductReview.Name
+    {
+        Rating,
+        Products.Name,
+        sum(Price) as TotalPrice
+    }
+    group by
+        Rating,
+        Products.Name
+    order by
+        Rating;
+
+
+entity ProjProducts  as projection on Products;
+
+entity ProjProducts2 as
+    projection on Products {
+        *
+    };
+
+entity ProjProducts3 as
+    projection on Products {
+        ReleaseDate,
+        Name
+    };
+
+// entity ParamProducts (pName : String) as select from Products{
+//     Name,
+//     Price,
+//     Quantity
+// }
+
+// entity ProjParamProducts (pName : String) as projection on Products
+//                         where Name = :pName;
+
+
+// extend Products with {
+//     PriceCondition : String(2);
+//     PriceDetermination : String(3);
+// };
+
 
 type EmailsAddresses_01 : array of {
     kind  : String;
@@ -21,20 +79,20 @@ type Emails {
     }
 }
 
-type Gender : String enum{
+type Gender             : String enum {
     male;
     female;
 };
 
 entity Order {
     clientGender : Gender;
-    status : Integer enum{
+    status       : Integer enum {
         submitted = 1;
         fulfiller = 2;
-        shipped = 3;
-        cancel = -1;
+        shipped   = 3;
+        cancel    = -1;
     };
-    Priority : String @assert.range enum{
+    Priority     : String @assert.range enum {
         high;
         medium;
         low;
@@ -49,12 +107,32 @@ type Address {
     Country    : String(3);
 }
 
+entity Orders {
+    key ID : UUID;
+    OrderItems : Composition of many OrderItem
+                       on OrderItems  .Order = $self;
+                       
+}
+
+
+entity OrderItem {
+    key ID : UUID;
+    Order : Association to Orders;
+    Product : Association to Products;
+}
+
+
+
+
+
+
 entity Customer {
 
     key ID   : Integer;
         name : String;
 
 };
+
 
 entity Products {
     key ID               : UUID;
@@ -68,11 +146,22 @@ entity Products {
         Width            : Decimal(16, 2);
         Depth            : Decimal(16, 2);
         Quantity         : Decimal(16, 2);
+        Suppliers_Id     : UUID;
+        Suppliers        : Association to Suppliers;
+        UnitOfMeasure    : Association to UnitOfMeasures;
+        Currency         : Association to Currencies;
+        DimensionUnit    : Association to DimensionUnits;
+        Category         : Association to Categories;
+        ToSalesData      : Association to many SalesData
+                               on ToSalesData.Product = $self;
+        ToReviews        : Association to many ProductReview
+                               on ToReviews.Product = $self;
 };
 
+
 entity Car {
-    key ID : UUID;
-        name : String;
+    key ID                 : UUID;
+        name               : String;
         virtual discount_1 : Decimal;
         virtual discount_2 : Decimal;
 }
@@ -119,13 +208,37 @@ entity Months {
 };
 
 entity ProductReview {
-    key Name    : String;
+    key ID      : UUID;
+        Name    : String;
         Rating  : Integer;
         Comment : String;
+        Product : Association to Products;
 };
 
 entity SalesData {
-    key ID           : UUID;
-        DeliveryDate : DateTime;
-        Revenue      : Decimal(16, 2);
+    key ID            : UUID;
+        DeliveryDate  : DateTime;
+        Revenue       : Decimal(16, 2);
+        Product       : Association to Products;
+        Currency      : Association to Currencies;
+        DeliveryMonth : Association to Months;
 };
+
+// entity Course {
+//     key ID      : UUID;
+//         Student : Association to many StudentCourse
+//                       on Student.Course = $self;
+// };
+
+// entity Student {
+//     key ID     : UUID;
+//         Course : Association to many StudentCourse
+//                      on Course.Student = $self;
+
+// };
+
+// entity StudentCourse {
+//     key ID      : UUID;
+//         Student : Association to Student;
+//         Course  : Association to Course;
+// };
