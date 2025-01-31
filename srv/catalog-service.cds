@@ -1,23 +1,96 @@
-using { com.alfa02 as alfa02 } from '../db/schema';
+using {com.alfa02 as alfa02} from '../db/schema';
+using {com.training as training} from '../db/training';
 
-service CustomerService {
+service CatalogService {
+    entity Products          as
+        select from alfa02.materials.Products {
+            ID,
+            Name          as ProductName @mandatory,
+            Description @mandatory, 
+            ImageUrl,
+            ReleaseDate,
+            DiscontinuedDate,
+            Price @mandatory,
+            Height,
+            Width,
+            Depth,
+            Quantity @mandatory,
+            UnitOfMeasure as ToUnitOfMeasure @mandatory, 
+            Currency      as ToCurrency @mandatory,
+            Category      as ToCategory @mandatory,
+            Category.Name as Category @mandatory,
+            DimensionUnit as ToDimensionUnit @mandatory,
+            SalesDate,
+            Supplier,
+            Reviews
+        };
 
-    //entity CustomerSrv as projection on alfa02.Customer;
-     
-    entity Products as projection on alfa02.Products;
-    entity Car as projection on alfa02.Car;
-    entity Suppliers as projection on alfa02.Suppliers;
-    entity Categories as projection on alfa02.Categories;
+    entity Supplier          as
+        select from alfa02.sales.Suppliers {
+            ID,
+            Name,
+            Email,
+            Phone,
+            Fax,
+            Product as ToProduct
+        };
 
-    entity StockAvailability as projection on alfa02.StockAvailability;
-    entity Currencies as projection on alfa02.Currencies;
-    entity UnitOfMeasures as projection on alfa02.UnitOfMeasures;
-    entity DimensionUnits as projection on alfa02.DimensionUnits;
-    entity Months as projection on alfa02.Months;
-    entity ProductReview as projection on alfa02.ProductReview;
-    entity SalesData as projection on alfa02.SalesData;
+    @readonly
+    entity Reviews           as
+        select from alfa02.materials.ProductReview {
+            ID,
+            Name,
+            Rating,
+            Comment,
+            createdAt,
+            Product as ToProduct
+        };
 
-    entity Orders as projection on alfa02.Orders;
-    entity OrderItem as projection on alfa02.OrderItem;
+    @readonly
+    entity SalesData         as
+        select from alfa02.sales.SalesData {
+            ID,
+            DeliveryDate,
+            Revenue,
+            Currency.ID               as CurrencyKey,
+            DeliveryMonth.ID          as DeliveryMonthId,
+            DeliveryMonth.Description as DeliveryMonth,
+            Product                   as ToProduct,
+        };
 
+    @readonly
+    entity StockAvailability as
+        select from alfa02.materials.StockAvailability {
+            ID,
+            Description,
+            Product as ToProduct
+        };
+
+    @readonly
+    entity VH_Categories     as
+        select from alfa02.materials.Categories {
+            ID   as Code,
+            Name as Text
+        };
+
+    @readonly
+    entity VH_Currencies     as
+        select from alfa02.materials.Currencies {
+            ID          as Code,
+            Description as Text
+        };
+
+    @readonly
+    entity VH_UnitOfMeasure  as
+        select from alfa02.materials.UnitOfMeasures {
+            ID          as Code,
+            Description as Text
+        };
+
+    @readonly
+    entity VH_DimensionUnits as
+        select from alfa02.materials.DimensionUnits {
+            ID          as Code,
+            Description as Text
+        };
 }
