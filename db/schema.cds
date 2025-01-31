@@ -1,5 +1,11 @@
 namespace com.alfa02;
 
+using {
+    cuid,
+    managed
+} from '@sap/cds/common';
+
+
 define type Name        : String(50);
 entity SelProducts   as select from Products;
 
@@ -107,23 +113,25 @@ type Address {
     Country    : String(3);
 }
 
-entity Orders {
-    key ID : UUID;
-    OrderItems : Composition of many OrderItem
-                       on OrderItems  .Order = $self;
-                       
+entity Orders : cuid {
+    //key ID         : UUID;
+        OrderItem : Composition of many OrderItems
+                         on OrderItem.Order = $self;
+
+}
+entity OrderItems : cuid {
+    key ID      : UUID;
+        Order   : Association to Orders;
+        Product : Association to Products;
 }
 
 
-entity OrderItem {
-    key ID : UUID;
-    Order : Association to Orders;
-    Product : Association to Products;
+entity Car {
+    key ID                 : UUID;
+        name               : String;
+        virtual discount_1 : Decimal;
+        virtual discount_2 : Decimal;
 }
-
-
-
-
 
 
 entity Customer {
@@ -134,10 +142,10 @@ entity Customer {
 };
 
 
-entity Products {
-    key ID               : UUID;
-        Name             : Name not null;
-        Description      : String;
+entity Products : cuid, managed {
+    //key ID               : UUID;
+        Name             : localized Name not null;
+        Description      : localized String;
         ImageUrl         : String;
         ReleaseDate      : DateTime default $now;
         DiscontinuedDate : DateTime;
@@ -158,16 +166,8 @@ entity Products {
                                on ToReviews.Product = $self;
 };
 
-
-entity Car {
-    key ID                 : UUID;
-        name               : String;
-        virtual discount_1 : Decimal;
-        virtual discount_2 : Decimal;
-}
-
-entity Suppliers {
-    key ID      : UUID;
+entity Suppliers : cuid, managed {
+    //key ID      : UUID;
         Name    : Products:Name;
         Address : Address;
         Email   : String;
@@ -178,45 +178,45 @@ entity Suppliers {
 
 entity Categories {
     key ID   : UUID;
-        Name : String;
+        Name : localized String;
 };
 
 entity StockAvailability {
     key ID          : Integer;
-        Description : String;
+        Description : localized String;
 };
 
 entity Currencies {
     key ID          : String(3);
-        Description : String;
+        Description : localized String;
 };
 
 entity UnitOfMeasures {
     key ID          : String(2);
-        Description : String;
+        Description : localized String;
 };
 
 entity DimensionUnits {
     key ID          : String(2);
-        Description : String;
+        Description : localized String;
 };
 
 entity Months {
     key ID               : String(2);
-        Description      : String;
-        ShortDescription : String(3);
+        Description : localized String;
+        ShortDescription : localized String(3);
 };
 
-entity ProductReview {
-    key ID      : UUID;
+entity ProductReview : cuid, managed {
+    //key ID      : UUID;
         Name    : String;
         Rating  : Integer;
         Comment : String;
         Product : Association to Products;
 };
 
-entity SalesData {
-    key ID            : UUID;
+entity SalesData : cuid, managed {
+    //key ID            : UUID;
         DeliveryDate  : DateTime;
         Revenue       : Decimal(16, 2);
         Product       : Association to Products;
